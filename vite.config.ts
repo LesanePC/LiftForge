@@ -3,16 +3,8 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/LiftForge/',
+  base: './',
   build: {
     outDir: 'dist',
-    rollupOptions: {
-      output: {
-        manualChunks: undefined,
-      },
-    },
-  },
-  server: {
-    port: 5173,
   },
 })
