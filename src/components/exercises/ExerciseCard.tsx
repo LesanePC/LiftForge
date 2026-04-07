@@ -1,63 +1,93 @@
+import { Trash2, Edit2 } from 'lucide-react';
 import type { Exercise } from '../../store/exerciseStore';
-
-const categoryIcons = {
-  bench: '🏋️',
-  squat: '🦵',
-  deadlift: '🏋️‍♂️',
-  accessory: '💪',
-};
-
-const categoryColors = {
-  bench: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
-  squat: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
-  deadlift: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200',
-  accessory: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
-};
 
 interface ExerciseCardProps {
   exercise: Exercise;
   onDelete?: (id: string) => void;
-  onSelect?: (exercise: Exercise) => void;
+  onEdit?: (exercise: Exercise) => void;
 }
 
-export function ExerciseCard({ exercise, onDelete, onSelect }: ExerciseCardProps) {
+export function ExerciseCard({ exercise, onDelete, onEdit }: ExerciseCardProps) {
+  const categoryIcons: Record<string, string> = {
+    bench: '🏋️',
+    squat: '🦵',
+    deadlift: '🏋️‍♂️',
+    accessory: '💪',
+  };
+
+  const categoryLabels: Record<string, string> = {
+    bench: 'Жимовые',
+    squat: 'Приседания',
+    deadlift: 'Тяговые',
+    accessory: 'Подсобные',
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-1">
-          <span className="text-2xl">{categoryIcons[exercise.category]}</span>
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+    <div className="group bg-zinc-900 border border-zinc-700 hover:border-zinc-500 rounded-2xl p-5 transition-all duration-200 hover:shadow-2xl">
+      <div className="flex items-start justify-between">
+        {/* Левая часть */}
+        <div className="flex items-center gap-4 flex-1">
+          <div className="text-4xl transition-transform group-hover:scale-110">
+            {categoryIcons[exercise.category] || '🏋️'}
+          </div>
+
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg leading-tight text-white">
               {exercise.name}
             </h3>
-            <span className={`text-xs px-2 py-1 rounded-full ${categoryColors[exercise.category]}`}>
-              {exercise.category === 'bench' && 'Жимовые'}
-              {exercise.category === 'squat' && 'Приседания'}
-              {exercise.category === 'deadlift' && 'Тяговые'}
-              {exercise.category === 'accessory' && 'Подсобные'}
+            <span className="text-xs px-3 py-1 mt-2 inline-block bg-zinc-800 text-zinc-400 rounded-full">
+              {categoryLabels[exercise.category] || exercise.category}
             </span>
           </div>
         </div>
-        
-        <div className="flex gap-2">
-          {onSelect && (
-            <button
-              onClick={() => onSelect(exercise)}
-              className="text-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              ➕
-            </button>
+
+        {/* Правая часть */}
+        <div className="flex flex-col items-end gap-2">
+          {exercise.isCustom && (
+            <span className="text-[10px] font-medium bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full">
+              Своё
+            </span>
           )}
-          {onDelete && exercise.isCustom && (
-            <button
-              onClick={() => onDelete(exercise.id)}
-              className="text-red-500 hover:text-red-600 dark:hover:text-red-400"
-            >
-              🗑️
-            </button>
-          )}
+
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {onEdit && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(exercise);
+                }}
+                className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"
+              >
+                <Edit2 size={18} />
+              </button>
+            )}
+
+            {onDelete && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm(`Удалить упражнение «${exercise.name}»?`)) {
+                    onDelete(exercise.id);
+                  }
+                }}
+                className="p-2 text-red-400 hover:text-red-500 hover:bg-zinc-800 rounded-xl transition-colors"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Личный рекорд — безопасно через optional chaining */}
+      {(exercise.bestWeight !== undefined || exercise.bestReps !== undefined) && (
+        <div className="mt-6 pt-4 border-t border-zinc-700 text-xs flex justify-between items-center text-zinc-400">
+          <span>Личный рекорд</span>
+          <span className="font-semibold text-emerald-400">
+            {exercise.bestWeight || 0} кг × {exercise.bestReps || 0}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

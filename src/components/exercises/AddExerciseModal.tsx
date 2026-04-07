@@ -1,85 +1,113 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 import type { Exercise } from '../../store/exerciseStore';
 
 interface AddExerciseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (exercise: Omit<Exercise, 'id'>) => void;
+  onAdd: (exercise: Omit<Exercise, 'id' | 'createdAt'>) => void;
 }
 
-export function AddExerciseModal({ isOpen, onClose, onAdd }: AddExerciseModalProps) {
+export default function AddExerciseModal({ isOpen, onClose, onAdd }: AddExerciseModalProps) {
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<Exercise['category']>('accessory');
+  const [category, setCategory] = useState<Exercise['category']>('bench');
+
+  const categories = [
+    { value: 'bench', label: 'Жимовые' },
+    { value: 'squat', label: 'Приседания' },
+    { value: 'deadlift', label: 'Тяговые' },
+    { value: 'accessory', label: 'Подсобные' },
+  ] as const;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    
+
     onAdd({
       name: name.trim(),
       category,
       isCustom: true,
-      createdAt: new Date().toISOString(),
     });
-    
+
+    // Сброс формы
     setName('');
-    setCategory('accessory');
+    setCategory('bench');
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-          Добавить упражнение
-        </h2>
-        
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+      <div 
+        className="bg-zinc-900 rounded-3xl w-full max-w-md mx-4 overflow-hidden shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Заголовок */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-700">
+          <h2 className="text-xl font-semibold text-white">Добавить упражнение</h2>
+          <button
+            onClick={onClose}
+            className="text-zinc-400 hover:text-white transition-colors p-2"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Название */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-400 mb-2">
               Название упражнения
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              placeholder="Например: Жим гантелей лёжа"
+              placeholder="Например: Жим гантелей на наклонной скамье"
+              className="w-full px-5 py-4 bg-zinc-800 border border-zinc-700 rounded-2xl focus:outline-none focus:border-accent-color text-white placeholder-zinc-500"
               autoFocus
+              required
             />
           </div>
-          
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+
+          {/* Категория */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-400 mb-3">
               Категория
             </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value as Exercise['category'])}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <option value="bench">Жимовые</option>
-              <option value="squat">Приседания</option>
-              <option value="deadlift">Тяговые</option>
-              <option value="accessory">Подсобные</option>
-            </select>
+            <div className="grid grid-cols-2 gap-3">
+              {categories.map((cat) => (
+                <button
+                  key={cat.value}
+                  type="button"
+                  onClick={() => setCategory(cat.value)}
+                  className={`py-4 px-5 rounded-2xl font-medium transition-all ${
+                    category === cat.value
+                      ? 'bg-accent-color text-black shadow-md'
+                      : 'bg-zinc-800 hover:bg-zinc-700'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
-          
-          <div className="flex gap-3">
+
+          {/* Кнопки */}
+          <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="flex-1 py-4 border border-zinc-700 hover:bg-zinc-800 rounded-2xl transition-colors font-medium"
             >
               Отмена
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="flex-1 py-4 bg-accent-color hover:bg-blue-500 text-black font-semibold rounded-2xl transition-colors"
             >
-              Добавить
+              Добавить упражнение
             </button>
           </div>
         </form>
