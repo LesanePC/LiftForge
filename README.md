@@ -132,7 +132,7 @@ PWA для установки на телефон
 
 ## 👨‍💻 Автор
 
-**Evgen** — [GitHub](https://github.com/LesanePC)
+**Eugene Fokin** — [GitHub](https://github.com/LesanePC)
 
 ---
 
